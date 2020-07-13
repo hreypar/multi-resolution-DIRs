@@ -8,9 +8,27 @@
 ########################################################################
 #
 #################### import libraries and set options ##################
+suppressMessages(library(optparse))
+#
 options(scipen = 10)
 #
-args = commandArgs(trailingOnly=TRUE)
+######################## create opts ###################################
+option_list = list(
+  make_option(opt_str = c("-i", "--input"), 
+              type = "character",
+              help = "Input filtered significant pairs as an Rds file"),
+  make_option(opt_str = c("-o", "--output"), 
+              type = "character", 
+              help = "output filepath for the summary stats object")
+)
+#
+opt <- parse_args(OptionParser(option_list=option_list))
+#
+### check the hicexp parameter is not empty
+if (is.null(opt$input)){
+  print_help(OptionParser(option_list=option_list))
+  stop("The input file is mandatory.n", call.=FALSE)
+}
 #
 ########################## functions ###################################
 # it's dangerous to go alone! take this.
@@ -65,10 +83,10 @@ generate_DIRs_summary <- function(comparison) {
 }
 #
 ############################ read in data #################################
-significantpairs.list <- readRDS(args[1])
+significantpairs.list <- readRDS(opt$input)
 #
 ######################## obtan summary of DIRs ############################
 DIRs.summary <- do.call(rbind, lapply(names(significantpairs.list), generate_DIRs_summary))
 #
 ############################# save ouput ##################################
-saveRDS(DIRs.summary, file = )
+saveRDS(DIRs.summary, file = opt$output)
