@@ -26,5 +26,5 @@ plot_multiresolution_heatmap:V:	results/
 	find -L $prereq \
 		-type f \
 		-name "*.summary.significantpairs.Rds" \
-		-exec bin/plot-DIRs-multiresolution-heatmap.R {} +;
+		-exec bin/plot-DIRs-multiresolution-heatmap.R --input {} --output results/$HEATMAP_PREFIX-multiresolution-DIRs-heatmap.png +;
 
