@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+# USAGE:
+# bin/targets
+
+find -L data/ \
+	-type f \
+	-name "*.significantpairs.Rds" \
+| sed -r \
+	-e 's#^data/#results/#' \
+	-e 's#.significantpairs.Rds$#.summary.significantpairs.Rds#'
+
