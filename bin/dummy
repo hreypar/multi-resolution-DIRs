@@ -1,0 +1,4 @@
+#!/usr/bin/bash
+
+echo the list of files $@ is cool to go
+
