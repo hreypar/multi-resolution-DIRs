@@ -7,28 +7,11 @@
 ########################################################################
 #
 #################### import libraries and set options ##################
-suppressMessages(library(optparse))
 suppressMessages(library(ggplot2))
 #
 options(scipen = 10)
 #
-######################## create opts ###################################
-option_list = list(
-  make_option(opt_str = c("-i", "--input"), 
-              type = "character",
-              help = "All of the files that will be used to produce a heatmap, separated by a blank space"),
-  make_option(opt_str = c("-o", "--output"), 
-              type = "character", 
-              help = "output filepath for the heatmap")
-)
-#
-opt <- parse_args(OptionParser(option_list=option_list))
-#
-### check the hicexp parameter is not empty
-if (is.null(opt$input)){
-  print_help(OptionParser(option_list=option_list))
-  stop("The input file is mandatory.n", call.=FALSE)
-}
+args = commandArgs(trailingOnly=TRUE)
 #
 ########################################################################
 ########################## functions ###################################
@@ -45,8 +28,14 @@ if (is.null(opt$input)){
 # }  
 #
 ########################################################################
+########################## parse args ##################################
+args = unlist(strsplit(args, " "))
+#
+output = args[grep(".png", args)]
+input = args[grep(".summary.significantpairs.Rds", args)]
+#
 ######################### read in data #################################
-multiresolution.DIRs.summary <- do.call(rbind, lapply(opt$input, readRDS))
+multiresolution.DIRs.summary <- do.call(rbind, lapply(input, readRDS))
 #
 ######################### format dataframe #############################
 #
@@ -68,12 +57,15 @@ multiresolution.DIRs.summary$Chromosome <- factor(multiresolution.DIRs.summary$C
 ####### prepare variables for plot
 
 ####### plot1
-png(filename = opt$output, height = 9, width = 15, units = "in", res = 300)
+png(filename = output, height = 12, width = 19, units = "in", res = 300)
 
 plot1 <- ggplot(multiresolution.DIRs.summary, 
        aes(x = Chromosome, y = as.factor(Resolution), fill = Count)) +
   geom_tile() + facet_wrap(~DIRs) + theme_minimal() +
-  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(plot.title = element_text(hjust = 0.5, size = 17),
+        axis.title.y = element_text(size = 12),
+        axis.title.x = element_text(size = 12),
+        strip.text = element_text(size = 14)) +
   scale_fill_gradient(name = "DIR Count",
                       low = "#BDC2BF",
                       high = "#023364") +
@@ -84,14 +76,17 @@ print(plot1)
 dev.off()
 
 ####### plot1 log10
-png(filename = gsub(".png", "-log10.png", opt$output), 
-    height = 9, width = 15, units = "in", res = 300)
+png(filename = gsub(".png", "-log10.png", output), 
+    height = 12, width = 19, units = "in", res = 300)
 
 plot1.log10 <- ggplot(multiresolution.DIRs.summary, 
                 aes(x = Chromosome, y = as.factor(Resolution), fill = log10(Count))) +
   geom_tile() + facet_wrap(~DIRs) + theme_minimal() +
-  theme(plot.title = element_text(hjust = 0.5)) +
-  scale_fill_gradient(name = "DIR Count (log10)",
+  theme(plot.title = element_text(hjust = 0.5, size = 17),
+        axis.title.y = element_text(size = 12 ),
+        axis.title.x = element_text(size = 12),
+        strip.text = element_text(size = 14)) +
+  scale_fill_gradient(name = "DIR Count\n(log10)",
                       low = "#BDC2BF",
                       high = "#023364") +
   ggtitle("Differentially Interacting Regions by Resolution\n") +
