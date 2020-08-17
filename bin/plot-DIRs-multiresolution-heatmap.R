@@ -40,22 +40,43 @@ input = args[grep(".summary.significantpairs.Rds", args)]
 multiresolution.DIRs.summary <- do.call(rbind, lapply(input, readRDS))
 #
 ######################### format dataframe #############################
-#
-# AGAIN, THIS MODULE IS HIGHLY SPECIFIC TO THESE MCF10 CANCER PROGRESSION
+# THIS IS HIGHLY SPECIFIC TO THESE MCF10 CANCER PROGRESSION
 # MODEL DATA. NOTHING SHOULD BE HARDCODED LIKE THIS
 #
 # set DIRs levels so they show up properly in the plot
-multiresolution.DIRs.summary$DIRs <- factor(multiresolution.DIRs.summary$DIRs, 
-       levels = c("MCF10AT1 vs MCF10A -logFC", "MCF10CA1a vs MCF10AT1 -logFC",
-                  "MCF10CA1a vs MCF10A -logFC", "MCF10AT1 vs MCF10A +logFC",
-                  "MCF10CA1a vs MCF10AT1 +logFC", "MCF10CA1a vs MCF10A +logFC"))
+ multiresolution.DIRs.summary$DIRs <- factor(multiresolution.DIRs.summary$DIRs, 
+        levels = c("MCF10CA1a vs MCF10A -logFC", "MCF10AT1 vs MCF10A -logFC",
+                   "MCF10CA1a vs MCF10AT1 -logFC", "MCF10CA1a vs MCF10A +logFC",
+                   "MCF10AT1 vs MCF10A +logFC", "MCF10CA1a vs MCF10AT1 +logFC"))
+##########################################################################################################
+########################## ONLY FOR Mammary Epithelial CANCER ############################################
+# multiresolution.DIRs.summary$DIRs <- unlist(lapply(multiresolution.DIRs.summary$DIRs, function(x) {
+#   gsub("ME", "Mammary Epithelial", x)
+# }))
+# 
+# multiresolution.DIRs.summary$DIRs <- factor(multiresolution.DIRs.summary$DIRs, 
+#           levels = c("Mammary Epithelial vs MCF10CA1a -logFC", "Mammary Epithelial vs MCF10AT1 -logFC",
+#                      "MCF10CA1a vs MCF10AT1 -logFC", "Mammary Epithelial vs MCF10CA1a +logFC",
+#                      "Mammary Epithelial vs MCF10AT1 +logFC", "MCF10CA1a vs MCF10AT1 +logFC"))
 
+#########################################################################################################
+#########################################################################################################
+####### ONLY FOR ME vs MCF10
+# multiresolution.DIRs.summary$DIRs <- unlist(lapply(multiresolution.DIRs.summary$DIRs, function(x) {
+#   gsub("ME", "Mammary Epithelial", x)
+# }))
+# 
+# multiresolution.DIRs.summary$DIRs <- factor(multiresolution.DIRs.summary$DIRs, 
+#             levels = c("Mammary Epithelial vs MCF10A -logFC", 
+#                        "Mammary Epithelial vs MCF10A +logFC"))
+
+#########################################################################################################
+#########################################################################################################
+#
 # remove the chr from chromosome so it doesn't clutter in the plot
 multiresolution.DIRs.summary$Chromosome <- gsub("chr", "", multiresolution.DIRs.summary$Chromosome)
 multiresolution.DIRs.summary$Chromosome <- factor(multiresolution.DIRs.summary$Chromosome, 
                                                   levels = c(seq(1,22), "X"))
-#
-
 # create factor to determine if it is a loss or a gain
 multiresolution.DIRs.summary$Interaction <- unlist(lapply(multiresolution.DIRs.summary$DIRs, function(s) {
   if(grepl(pattern = "\\+", s)) {
@@ -71,18 +92,8 @@ multiresolution.DIRs.summary$Interaction <- unlist(lapply(multiresolution.DIRs.s
 ####### plot1
 png(filename = output, height = 12, width = 19, units = "in", res = 300)
 
-pgain <-   ggplot(multiresolution.DIRs.summary[multiresolution.DIRs.summary$Interaction == "Gain", ],
-                  aes(x = Chromosome, y = as.factor(Resolution), fill = Count)) +
-  geom_tile() + facet_wrap(~DIRs) + theme_minimal() +
-  theme(plot.title = element_text(hjust = 0.5, size = 17),
-        axis.title.y = element_text(size = 12),
-        axis.title.x = element_text(size = 12),
-        strip.text = element_text(size = 14)) +
-  scale_fill_gradient(name = "Number of\ngained DIR",
-                      low = "#bfc0c0",
-                      high = "#466995") +
-  ggtitle("Differentially Interacting Regions by Resolution\n") +
-  ylab("Resolution (bp)")
+# only for two groups
+#png(filename = output, height = 7, width = 16, units = "in", res = 300)
 
 ploss <-   ggplot(multiresolution.DIRs.summary[multiresolution.DIRs.summary$Interaction == "Loss", ],
                   aes(x = Chromosome, y = as.factor(Resolution), fill = Count)) +
@@ -94,15 +105,49 @@ ploss <-   ggplot(multiresolution.DIRs.summary[multiresolution.DIRs.summary$Inte
   scale_fill_gradient(name = "Number of\nlost DIRs",
                       low = "#bfc0c0",
                       high = "#53131e") +
+  ggtitle("Differentially Interacting Regions by Resolution\n") +
   ylab("Resolution (bp)")
 
-pgain / ploss
+pgain <-   ggplot(multiresolution.DIRs.summary[multiresolution.DIRs.summary$Interaction == "Gain", ],
+                  aes(x = Chromosome, y = as.factor(Resolution), fill = Count)) +
+  geom_tile() + facet_wrap(~DIRs) + theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 17),
+        axis.title.y = element_text(size = 12),
+        axis.title.x = element_text(size = 12),
+        strip.text = element_text(size = 14)) +
+  scale_fill_gradient(name = "Number of\ngained DIR",
+                      low = "#bfc0c0",
+                      high = "#466995") +
+  ylab("Resolution (bp)")
+
+
+ploss / pgain
+
+# only for two groups
+#ploss + pgain
 
 dev.off()
 
 ####### plot1 log10
 png(filename = gsub(".png", "-log2.png", output), 
     height = 12, width = 19, units = "in", res = 300)
+
+# only for two groups
+#png(filename = gsub(".png", "-log2.png", output), height = 7, width = 16, units = "in", res = 300)
+
+
+ploss.log2 <-   ggplot(multiresolution.DIRs.summary[multiresolution.DIRs.summary$Interaction == "Loss", ],
+                       aes(x = Chromosome, y = as.factor(Resolution), fill = log2(Count))) +
+  geom_tile() + facet_wrap(~DIRs) + theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 17),
+        axis.title.y = element_text(size = 12),
+        axis.title.x = element_text(size = 12),
+        strip.text = element_text(size = 14)) +
+  scale_fill_gradient(name = "Number of\nlost DIRs\n(log2)",
+                      low = "#bfc0c0",
+                      high = "#53131e") +
+  ggtitle("Differentially Interacting Regions by Resolution\n") +
+  ylab("Resolution (bp)")
 
 pgain.log2 <-   ggplot(multiresolution.DIRs.summary[multiresolution.DIRs.summary$Interaction == "Gain", ],
                   aes(x = Chromosome, y = as.factor(Resolution), fill = log2(Count))) +
@@ -114,22 +159,13 @@ pgain.log2 <-   ggplot(multiresolution.DIRs.summary[multiresolution.DIRs.summary
   scale_fill_gradient(name = "Number of\ngained DIRs\n(log2)",
                       low = "#bfc0c0",
                       high = "#466995") +
-  ggtitle("Differentially Interacting Regions by Resolution\n") +
   ylab("Resolution (bp)")
 
-ploss.log2 <-   ggplot(multiresolution.DIRs.summary[multiresolution.DIRs.summary$Interaction == "Loss", ],
-                  aes(x = Chromosome, y = as.factor(Resolution), fill = log2(Count))) +
-  geom_tile() + facet_wrap(~DIRs) + theme_minimal() +
-  theme(plot.title = element_text(hjust = 0.5, size = 17),
-        axis.title.y = element_text(size = 12),
-        axis.title.x = element_text(size = 12),
-        strip.text = element_text(size = 14)) +
-  scale_fill_gradient(name = "Number of\nlost DIRs\n(log2)",
-                      low = "#bfc0c0",
-                      high = "#53131e") +
-  ylab("Resolution (bp)")
 
-pgain.log2 / ploss.log2
+ploss.log2 / pgain.log2
+
+# only for two groups
+#ploss.log2 + pgain.log2
 
 dev.off()
   
