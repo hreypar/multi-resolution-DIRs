@@ -65,10 +65,10 @@ generate_DIRs_summary <- function(comparison) {
   
   # edit comparison name to use in DIRs column
   #
-  # THIS IS SO WRONG, THE MCF10- PREFIX IS TOTALLY A HARDCODED THING
+  # THIS IS SO WRONG, THE point between the names IS TOTALLY A HARDCODED THING
   # WHICH SHOULD NOT HAPPEN IN A SIRIUS SCRIPT.
   #
-  c = gsub("MCF10-", "", gsub("\\.", " vs ", gsub("sig.", "", comparison)))
+  c = gsub("\\.", " vs ", gsub("sig.", "", comparison))
   # remap logfc to factor and create new DIRs factor column
   comparison.data$DIRs <- paste(c, logfc_to_category(comparison.data[, "logFC"]))
   
