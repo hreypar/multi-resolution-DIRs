@@ -57,14 +57,14 @@ multiresolution.DIRs.summary$Chromosome <- factor(multiresolution.DIRs.summary$C
 #
 
 # create factor to determine if it is a loss or a gain
-Interaction <- unlist(lapply(multiresolution.DIRs.summary$DIRs, function(s) {
+multiresolution.DIRs.summary$Interaction <- unlist(lapply(multiresolution.DIRs.summary$DIRs, function(s) {
   if(grepl(pattern = "\\+", s)) {
     return("Gain")
   } else if(grepl(pattern = "\\-", s)) {
     return("Loss")
   }
 }))
-multiresolution.DIRs.summary$Interaction <- Interaction
+#
 ######################### plot heatmap #################################
 ####### prepare variables for plot
 
